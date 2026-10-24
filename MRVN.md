@@ -13,9 +13,10 @@
 |---|---|
 | `KRATOS_ADMIN_URL` | `http://kratos-admin.ory.svc.cluster.local` |
 | `HYDRA_ADMIN_URL` | `http://hydra-admin.ory.svc.cluster.local` |
+| `KETO_READ_URL` | `http://keto-read.ory.svc.cluster.local` |
+| `KETO_WRITE_URL` | `http://keto-write.ory.svc.cluster.local` |
 | `TRUST_EDGE` | `1` |
 | `REQUIRED_ADMIN_GROUP` | `admins` |
 | `SESSION_SECRET` | from Secret `ory-ui-console-secrets` |
-| `KETO_*` | optional (unset = Keto pages error gracefully) |
 
 Flux: `infrastructure/base/ory/auth-admin/` keeps Service/VS name `auth-admin` → `id-admin.internal.mrvn.me`.
