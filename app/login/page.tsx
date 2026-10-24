@@ -1,19 +1,41 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { MrvnLogo } from "@/components/mrvn-logo";
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter();
+  const search = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(search.get("error") ?? "");
   const [loading, setLoading] = useState(false);
+  const [edgeOnly, setEdgeOnly] = useState(false);
+
+  useEffect(() => {
+    // If Oathkeeper already authenticated, bounce into dashboard.
+    void fetch("/api/auth/me")
+      .then(async (res) => {
+        if (res.ok) {
+          router.replace("/dashboard");
+          return;
+        }
+        if (res.status === 401) {
+          const data = (await res.json().catch(() => ({}))) as {
+            trustEdge?: boolean;
+            passwordLogin?: boolean;
+          };
+          if (data.trustEdge && !data.passwordLogin) {
+            setEdgeOnly(true);
+          }
+        }
+      })
+      .catch(() => undefined);
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,17 +57,35 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="absolute right-4 top-4">
-        <ThemeToggle />
-      </div>
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">Ory Console</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Sign in to manage your Ory stack.
-          </p>
-        </CardHeader>
-        <CardContent>
+      <div className="glass-solid element-border-gradiented-top shadow-overlay flex w-full max-w-sm flex-col gap-5 rounded-[30px] p-6 text-left">
+        <div className="flex flex-col gap-3">
+          <MrvnLogo size="lg" />
+          <div>
+            <h1 className="text-lg font-medium tracking-tight">Id Admin</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Internal IdP console · behind Oathkeeper
+            </p>
+          </div>
+        </div>
+
+        {edgeOnly ? (
+          <div className="space-y-4 text-sm text-muted-foreground">
+            <p>
+              Sign in at{" "}
+              <a className="soft-link" href="https://auth.mrvn.me/login">
+                auth.mrvn.me
+              </a>{" "}
+              with group <code className="text-foreground">admins</code>, then
+              return here.
+            </p>
+            <a
+              className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
+              href="https://auth.mrvn.me/login?return_to=https%3A%2F%2Fid-admin.internal.mrvn.me%2F"
+            >
+              Continue to login
+            </a>
+          </div>
+        ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -55,6 +95,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
@@ -65,19 +106,34 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-background"
               />
             </div>
-            {error && (
+            {error ? (
               <p className="rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                 {error}
               </p>
-            )}
+            ) : null}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
+          Loading…
+        </div>
+      }
+    >
+      <LoginInner />
+    </Suspense>
   );
 }

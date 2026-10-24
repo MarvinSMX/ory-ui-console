@@ -34,8 +34,8 @@ export default async function DashboardPage() {
     <div>
       <PageHeader
         eyebrow="Overview"
-        title="Ory Stack Dashboard"
-        description="A focused control surface for identity, OAuth2 clients, consent state, and authorization checks."
+        title="Id Admin"
+        description="Kratos identities, Hydra OAuth2, and optional Keto — internal only."
       />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(({ label, value, icon: Icon, hint }) => (

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { keto } from "@/lib/ory/keto";
-import { getSession } from "@/lib/session";
+import { requireAdminJson } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
-  const session = await getSession();
-  if (!session.admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminJson();
+  if (!access.ok) return access.response;
   const { searchParams } = req.nextUrl;
   const ns = searchParams.get("namespace") ?? "";
   const obj = searchParams.get("object") ?? "";

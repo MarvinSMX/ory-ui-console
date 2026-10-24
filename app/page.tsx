@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/session";
+import { resolveAdmin } from "@/lib/auth";
 
 export default async function RootPage() {
-  const session = await getSession();
-  if (session.admin) redirect("/dashboard");
+  const access = await resolveAdmin();
+  if (access.ok) redirect("/dashboard");
   redirect("/login");
 }

@@ -14,12 +14,10 @@ import {
   Settings,
   LayoutDashboard,
   LogOut,
-  Boxes,
   UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import OryLogo from "@/public/icon.svg";
-import Image from "next/image";
+import { MrvnLogo } from "@/components/mrvn-logo";
 
 const NAV = [
   {
@@ -60,14 +58,15 @@ export function NavSidebar({ className }: { className?: string }) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
-      window.location.href = "/login";
+      // Edge sessions live at Oathkeeper/Kratos — send user to auth UI logout.
+      window.location.href = "https://auth.mrvn.me/logout";
     }
   }
 
   return (
     <nav
       className={cn(
-        "glass-panel flex h-full  w-72 flex-col gap-5 border-white dark:border-neutral-400 px-4 py-5 lg:rounded-[2rem]",
+        "glass-panel glass-solid element-border-gradiented-top flex h-full w-72 flex-col gap-5 px-4 py-5 lg:rounded-[2rem]",
         className,
       )}
     >
@@ -75,16 +74,13 @@ export function NavSidebar({ className }: { className?: string }) {
         href="/dashboard"
         className="flex items-center gap-3 rounded-2xl px-2"
       >
-        <span className="flex size-10 items-center justify-center rounded-2xl  text-primary-foreground shadow-sm">
-          {/* <Boxes className="size-5" /> */}
-          <Image src={OryLogo} alt="ory-logo" className="size-10" />
-        </span>
+        <MrvnLogo size="md" />
         <span>
           <span className="block text-sm font-semibold tracking-tight">
-            Ory Console
+            Id Admin
           </span>
           <span className="text-xs text-muted-foreground">
-            Identity, OAuth2, AuthZ
+            internal · group admins
           </span>
         </span>
       </Link>

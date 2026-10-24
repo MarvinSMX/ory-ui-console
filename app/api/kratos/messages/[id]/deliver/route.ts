@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { kratos } from "@/lib/ory/kratos";
-import { getSession } from "@/lib/session";
+import { requireAdminJson } from "@/lib/auth";
 
 export async function PATCH(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session.admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const access = await requireAdminJson();
+  if (!access.ok) return access.response;
   try {
     const { id } = await params;
     await kratos.retryMessage(id);
